@@ -1,0 +1,16 @@
+# Byte-compiled / optimized / DLL files
+__pycache__/
+*.py[cod]
+*$py.class
+
+# C extensions
+*.so
+
+# Virtual environment
+.venv/
+.env/
+.env.* # For environment files (if you use dotenv)
+.env
+uploads/
+logs/
+.DS_Store
