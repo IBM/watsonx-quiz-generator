@@ -17,6 +17,9 @@ Output Requirements:
 	•	Ensure each question has four plausible options labeled A, B, C, D.
 	•	Highlight the correct answer immediately after the options.
 	•	Maintain uniqueness for all questions in terms of content and phrasing.
+ 	•	At the end of the quiz and all the questions and answers give a line of dashes.
+  	•	End response generation at the end of the quiz with a line of dashes.
+	
 	
 Output Format:
 1. [Question Text]  
@@ -54,7 +57,10 @@ A) Marketing data
 B) Network logs  
 C) Sales projections  
 D) Meeting schedules  
-ANSWER: B"""
+ANSWER: B
+
+-------------------------------
+"""
 
 user_msg = """
 User Input:

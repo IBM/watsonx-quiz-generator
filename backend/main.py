@@ -53,53 +53,54 @@ async def upload_file(
         print("Processing File")
         processed_text = extract_text_from_pdf(file_path)  # Extract text from PDF
         print("File Processed")
-
-        variables = {
-            "content": processed_text,
-            "difficulty": difficulty,
-            "no_of_questions": no_of_questions,
-            "additional_contents": additional_contents,
-        }
-
-        print("Generating Quiz")
-
-        try:
-            generated_quiz = generate_quiz(variables)
-        except Exception as e:
-            print(f"Error generating quiz: {e}")
-            raise HTTPException(
-                status_code=500, detail="Failed to generate quiz"
-            ) from e
-
-        finally:
-            # Delete the file after processing
-            if os.path.exists(file_path):
-                os.remove(file_path)
-
-        return {
-            "generated_quiz": generated_quiz,
-        }
+        # Remove File after text extraction
+        if os.path.exists(file_path):
+            os.remove(file_path)
 
     else:
         processed_text = clean_text(content)
 
-        variables = {
-            "content": processed_text,
-            "difficulty": difficulty,
-            "no_of_questions": no_of_questions,
-            "additional_contents": additional_contents,
-        }
+    variables = {
+        "content": processed_text,
+        "difficulty": difficulty,
+        "no_of_questions": no_of_questions,
+        "additional_contents": additional_contents,
+    }
 
-        print("Generating Quiz")
-
-        try:
-            generated_quiz = generate_quiz(variables)
-        except Exception as e:
-            print(f"Error generating quiz: {e}")
+    print("Generating Quiz")
+    error_detail = ""
+    try:
+        generated_quiz = generate_quiz(variables)
+        if generated_quiz == False:
+            error_detail = (
+                "Error: Document content too large. Please upload a smaller document."
+            )
             raise HTTPException(
-                status_code=500, detail="Failed to generate quiz"
-            ) from e
+                status_code=400,
+                detail=error_detail,
+            )
+        elif generated_quiz == "Error":
+            error_detail = (
+                "Error occurred while generating quiz. Please try again later."
+            )
+            raise HTTPException(
+                status_code=400,
+                detail=error_detail,
+            )
+        else:
+            print("Quiz Generated Successfully")
+            print(generated_quiz)  # Debugging line to see the generated quiz output
+            return {
+                "generated_quiz": generated_quiz,
+            }
 
-        return {
-            "generated_quiz": generated_quiz,
-        }
+    except Exception as e:
+        print(f"Error generating quiz: {e}")
+        if error_detail == "":
+            error_detail = (
+                "Error occurred while generating quiz. Please try again later."
+            )
+        raise HTTPException(
+            status_code=400,
+            detail=error_detail,
+        ) from e

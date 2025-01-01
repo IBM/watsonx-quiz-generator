@@ -4,6 +4,14 @@ import Page2 from "@/components/Page2";
 import Page3 from "@/components/Page3";
 import Loading from "@/components/Loading";
 import { useState } from "react";
+import axios from "axios";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogTitle,
+} from "@/components/ui/dialog";
+import { Button } from "@/components/ui/button";
 
 export default function Home() {
   const [currentPage, setCurrentPage] = useState(1);
@@ -17,6 +25,8 @@ export default function Home() {
   const [noOfQuestions, setNoOfQuestions] = useState<number>(10);
   const [additionalPrompt, setAdditionalPrompt] = useState<string>("");
   const [loading, setLoading] = useState(false);
+  const [showAlert, setShowAlert] = useState(false);
+  const [alertText, setAlertText] = useState<string>("");
   const handleAdditionalPromptChange = (text: string) => {
     setAdditionalPrompt(text);
   };
@@ -94,28 +104,33 @@ export default function Home() {
     formData.append("additional_contents", additionalPrompt);
 
     try {
-      const response = await fetch("http://127.0.0.1:8000/upload", {
-        method: "POST",
-        body: formData,
-      });
+      const response = await axios.post(
+        "http://127.0.0.1:8000/upload",
+        formData
+      );
 
-      if (!response.ok) {
-        throw new Error("Failed to upload file.");
-      }
-      const data = await response.json();
+      const data = response.data;
       if (data) {
         downloadTxtFile(data.generated_quiz);
       }
       console.log(data);
-      // handlePageChange(3);
-    } catch {
-      console.error(error);
-      alert("An error occurred while uploading the file.");
-    } finally {
       setLoading(false);
-      alert(
+      setAlertText(
         "Quiz Downloaded Successfully! Please check your downloads folder."
       );
+      // handlePageChange(3);
+    } catch (error: any) {
+      setLoading(false);
+      console.error(error);
+      if (error.response) {
+        console.error("Error data:", error.response.data.detail);
+        setAlertText(error.response.data.detail);
+      } else {
+        setAlertText("An error occurred while generating the quiz.");
+      }
+    } finally {
+      setLoading(false);
+      setShowAlert(true);
     }
   };
 
@@ -154,6 +169,39 @@ export default function Home() {
       )}
       {currentPage === 3 && <Page3 handlePageChange={handlePageChange} />}
       <Loading open={loading} />
+      <>
+        <Dialog open={showAlert}>
+          <DialogTitle style={{ display: "none" }}>Processing</DialogTitle>
+          <DialogContent
+            className={`[&>button]:hidden ${
+              alertText.toLowerCase().includes("error") ? "border-red-600" : ""
+            } `}
+          >
+            <DialogDescription style={{ display: "none" }}>
+              Processing Transaction
+            </DialogDescription>
+            <div className="flex items-center justify-center gap-4">
+              <div className="text-lg items-center justify-center border-red-500  flex-wrap gap-2 font-semibold ml-4 transition-all flex">
+                {alertText}
+              </div>
+              <Button
+                className={` ${
+                  alertText.toLowerCase().includes("error")
+                    ? "border-red-600"
+                    : ""
+                } `}
+                onClick={() => {
+                  setShowAlert(false);
+                  setAlertText("");
+                }}
+                variant={"outline"}
+              >
+                Close
+              </Button>
+            </div>
+          </DialogContent>
+        </Dialog>
+      </>
     </div>
   );
 }

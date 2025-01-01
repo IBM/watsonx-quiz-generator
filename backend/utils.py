@@ -30,9 +30,8 @@ def is_toc_or_index_page(text: str) -> bool:
         return True
 
     # Check for typical TOC line format: "Title .............. PageNumber"
-    toc_line_pattern = re.compile(r"^\s*[\w\s]+\s+\.{3,}\s+\d+$", re.MULTILINE)
-    toc_lines = toc_line_pattern.findall(text)
-
+    pattern = r"\.{10,}"
+    toc_lines = re.findall(pattern, text)
     # Ensure there are at least 3 lines matching the TOC format
     if len(toc_lines) >= 3:
         return True
@@ -50,18 +49,8 @@ def clean_header_footer(text: str) -> str:
     Returns:
         str: Cleaned text
     """
-    # # Remove common header/footer patterns
-    # text = re.sub(
-    #     r"(?i)\n.*?(confidential|all rights reserved|draft|page \d+).*?\n",
-    #     "\n",
-    #     text,
-    #     flags=re.DOTALL,
-    # )
 
     # Remove page numbers
     text = re.sub(r"\n\s*\d+\s*\n", "\n", text)
-
-    # Remove excessive whitespace or empty lines left by removal
-    text = re.sub(r"\n+", "\n", text).strip()
 
     return text.strip()
