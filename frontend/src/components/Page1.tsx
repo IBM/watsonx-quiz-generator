@@ -11,9 +11,15 @@ interface Page1Props {
   handleFileChange: (event: React.ChangeEvent<HTMLInputElement>) => void;
   selectedFile: File | "";
   error: string | null;
+  apiKey: string;
+  url: string;
+  projectId: string;
   resetFile: () => void;
   inputText: string;
   handleInputTextUpdate: (newText: string) => void;
+  handleApiChange: (newText: string) => void;
+  handleUrlChange: (newText: string) => void;
+  handleProjectIdChange: (newText: string) => void;
 }
 
 function Page1({
@@ -24,6 +30,12 @@ function Page1({
   resetFile,
   inputText,
   handleInputTextUpdate,
+  handleApiChange,
+  handleUrlChange,
+  handleProjectIdChange,
+  apiKey,
+  projectId,
+  url,
 }: Page1Props) {
   const [inputType, setInputType] = useState<"file" | "text">("file");
   return (
@@ -33,10 +45,38 @@ function Page1({
         quiz from any text or file content. The quiz will be generated based on
         the content provided and you can take the quiz to test your knowledge.
         The application uses WatsonX based LLM to analyze your text and generate
-        a quiz. To get started, simply provide the text below or upload a pdf
-        file and click next
+        a quiz. To get started, enter your IBM WatsonX Credentials below and
+        then simply provide the text input or upload a pdf file and click next.{" "}
+        <a
+          target="blank"
+          href="https://dataplatform.cloud.ibm.com/developer-access?context=wx"
+          className="font-medium text-blue-600 dark:text-blue-500 hover:underline"
+        >
+          Click Here
+        </a>{" "}
+        to get your WatsonX Credentials.
+        <br /> Note: Your credentials are handled in a secure manner and are not
+        stored anywhere in the application
       </div>
       <div className=" px-10 py-10 flex flex-col justify-center items-center w-full">
+        <div className="p-4">Enter Your Credentials</div>
+        <div className="flex gap-4 p-4 mb-4 w-[80vw] flex-wrap md:flex-nowrap">
+          <Input
+            type="text"
+            placeholder="WatsonX API Key"
+            onChange={(e) => handleApiChange(e.target.value)}
+          />
+          <Input
+            type="text"
+            placeholder="WatsonX Region URL"
+            onChange={(e) => handleUrlChange(e.target.value)}
+          />
+          <Input
+            type="text"
+            placeholder="WatsonX Project ID"
+            onChange={(e) => handleProjectIdChange(e.target.value)}
+          />
+        </div>
         <div>Select your input type</div>
         <RadioGroup
           className="flex gap-4 py-5 px-5"
@@ -58,7 +98,7 @@ function Page1({
         </RadioGroup>
         <div className="w-full flex justify-center items-center">
           {inputType === "text" && (
-            <div className="h-[500px] w-[90%] py-5">
+            <div className="h-[400px] w-[90%] py-5">
               <div className="text-center pb-5 font-semibold">
                 Insert text below
               </div>
@@ -83,7 +123,7 @@ function Page1({
           )}
           {inputType === "file" && (
             <>
-              <div className="flex h-[500px] flex-col px-10 py-10 gap-5 justify-center items-center">
+              <div className="flex h-[400px] flex-col px-10 py-10 gap-5 justify-center items-center">
                 <Label
                   htmlFor="file-input"
                   className="block text-sm font-medium cursor-pointer"
@@ -121,6 +161,22 @@ function Page1({
           <Button
             className="w-[200px]"
             onClick={() => {
+              if (process.env.NODE_ENV === "production") {
+                console.log("Running in production mode");
+                if (!apiKey) {
+                  alert("Please enter your WatsonX API key.");
+                  return;
+                }
+                if (!url) {
+                  alert("Please enter your WatsonX region URL.");
+                  return;
+                }
+                if (!projectId) {
+                  alert("Please enter your WatsonX project ID.");
+                  return;
+                }
+              }
+
               if (inputType === "text") {
                 if (inputText.length < 500 || inputText.length > 50000) {
                   alert("Text must be between 500 and 50000 characters");

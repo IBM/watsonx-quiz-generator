@@ -33,6 +33,9 @@ async def upload_file(
     difficulty: str = Form(...),
     no_of_questions: str = Form(...),
     additional_contents: str = Form(None),
+    apikey: str = Form(None),
+    url: str = Form(None),
+    project_id: str = Form(None),
 ):
     if not additional_contents:
         additional_contents = "Be concise and keep the questions unique."
@@ -70,7 +73,9 @@ async def upload_file(
     print("Generating Quiz")
     error_detail = ""
     try:
-        generated_quiz = generate_quiz(variables)
+        generated_quiz = generate_quiz(
+            variables, {"apikey": apikey, "url": url, "project_id": project_id}
+        )
         if generated_quiz == False:
             error_detail = (
                 "Error: Document content too large. Please upload a smaller document."
@@ -83,6 +88,21 @@ async def upload_file(
             error_detail = (
                 "Error occurred while generating quiz. Please try again later."
             )
+            raise HTTPException(
+                status_code=400,
+                detail=error_detail,
+            )
+        elif (
+            generated_quiz
+            == "Invalid configuration. Please provide the URL, API key, and project ID."
+        ):
+            error_detail = "Invalid configuration. Please provide the URL, API key, and project ID."
+            raise HTTPException(
+                status_code=400,
+                detail=error_detail,
+            )
+        elif "Error" in generated_quiz and "validation error" in generated_quiz:
+            error_detail = "Invalid configuration. Please provide the URL, API key, and project ID."
             raise HTTPException(
                 status_code=400,
                 detail=error_detail,

@@ -27,6 +27,9 @@ export default function Home() {
   const [loading, setLoading] = useState(false);
   const [showAlert, setShowAlert] = useState(false);
   const [alertText, setAlertText] = useState<string>("");
+  const [apiKey, setApiKey] = useState<string>("");
+  const [url, setUrl] = useState<string>("");
+  const [projectId, setProjectId] = useState<string>("");
   const handleAdditionalPromptChange = (text: string) => {
     setAdditionalPrompt(text);
   };
@@ -43,6 +46,15 @@ export default function Home() {
     newDifficulty: "easy" | "medium" | "hard"
   ) => {
     setDifficulty(newDifficulty);
+  };
+  const handleApiKeyChange = (text: string) => {
+    setApiKey(text);
+  };
+  const handleUrlChange = (text: string) => {
+    setUrl(text);
+  };
+  const handleProjectIdChange = (text: string) => {
+    setProjectId(text);
   };
 
   const handleFileChange = (event: React.ChangeEvent<HTMLInputElement>) => {
@@ -102,6 +114,9 @@ export default function Home() {
     formData.append("difficulty", difficulty);
     formData.append("no_of_questions", noOfQuestions.toString());
     formData.append("additional_contents", additionalPrompt);
+    formData.append("apikey", apiKey);
+    formData.append("url", url);
+    formData.append("project_id", projectId);
 
     try {
       const response = await axios.post(
@@ -119,7 +134,7 @@ export default function Home() {
         "Quiz Downloaded Successfully! Please check your downloads folder."
       );
       // handlePageChange(3);
-    } catch (error: any) {
+    } catch (error: any /* eslint-disable-line @typescript-eslint/no-explicit-any */) {
       setLoading(false);
       console.error(error);
       if (error.response) {
@@ -148,6 +163,12 @@ export default function Home() {
         <Page1
           handlePageChange={handlePageChange}
           handleFileChange={handleFileChange}
+          handleApiChange={handleApiKeyChange}
+          handleUrlChange={handleUrlChange}
+          apiKey={apiKey}
+          url={url}
+          projectId={projectId}
+          handleProjectIdChange={handleProjectIdChange}
           selectedFile={selectedFile}
           error={error}
           resetFile={resetFile}

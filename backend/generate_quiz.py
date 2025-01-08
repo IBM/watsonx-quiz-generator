@@ -31,13 +31,6 @@ parameters = {
     "stop_sequences": ["----------", "Note:"],
 }
 
-watsonx_llm = WatsonxLLM(
-    model_id="meta-llama/llama-3-3-70b-instruct",
-    url=os.getenv("WATSONX_URL"),
-    project_id=os.getenv("PROJECT_ID"),
-    apikey=os.getenv("WAX_API_KEY"),
-    params=parameters,
-)
 
 # LLM for summarizing long text or document for quiz generation
 sum_parameters = {
@@ -46,14 +39,6 @@ sum_parameters = {
     "min_new_tokens": 1,
     "repetition_penalty": 1,
 }
-
-summarize_llm = WatsonxLLM(
-    model_id="mistralai/mixtral-8x7b-instruct-v01",
-    url=os.getenv("WATSONX_URL"),
-    project_id=os.getenv("PROJECT_ID"),
-    apikey=os.getenv("WAX_API_KEY"),
-    params=sum_parameters,
-)
 
 
 # Function to extract text from PDF and clean it
@@ -88,17 +73,46 @@ def extract_text_from_pdf(pdf_path):
     return processed_text
 
 
-def generate_quiz(variables):
+def generate_quiz(variables, configuration={}):
 
     no_of_tokens = token_calculator(variables["content"])
     print("input tokens:", no_of_tokens)
 
     # Too many contents. cancel process
-    if no_of_tokens > 50000:
+    if no_of_tokens > 70000:
         print(
             "Too many tokens. Canceling process. Please provide a shorter document. Exiting."
         )
         return False
+    if os.getenv("env") == "production":
+        if (
+            not configuration["url"]
+            or not configuration["apikey"]
+            or not configuration["project_id"]
+        ):
+            print(
+                "Missing Watsonx API details. Please provide the URL, API key, and project ID."
+            )
+            return "Invalid configuration. Please provide the URL, API key, and project ID."
+        try:
+            watsonx_llm = WatsonxLLM(
+                model_id="meta-llama/llama-3-3-70b-instruct",
+                url=configuration["url"],
+                project_id=configuration["project_id"],
+                apikey=configuration["apikey"],
+                params=parameters,
+            )
+        except Exception as e:
+            print(e)
+            return f"Error {e}"
+    else:
+        watsonx_llm = WatsonxLLM(
+            model_id="meta-llama/llama-3-3-70b-instruct",
+            url=os.getenv("WATSONX_URL"),
+            project_id=os.getenv("PROJECT_ID"),
+            apikey=os.getenv("WAX_API_KEY"),
+            params=parameters,
+        )
 
     # directly process if content length is less than 15000 tokens.
     if no_of_tokens < 15000:
@@ -107,10 +121,10 @@ def generate_quiz(variables):
         # print(final_prompt)
 
     # Summarize document and generate quiz for larger inputs.
-    elif no_of_tokens > 15000 and no_of_tokens < 50000:
+    elif no_of_tokens > 15000 and no_of_tokens < 70000:
         try:
             print("large input detected, summarizing...")
-            content_summary = summarize_input(variables["content"])
+            content_summary = summarize_input(variables["content"], configuration)
             print("input summarized")
 
             # Render the final prompt with summary
@@ -144,7 +158,24 @@ def chunk_input(text):
     return docs
 
 
-def summarize_input(text):
+def summarize_input(text, configuration={}):
+    if os.getenv("env") == "production":
+        watsonx_llm = WatsonxLLM(
+            model_id="mistralai/mixtral-8x7b-instruct-v01",
+            url=configuration["url"],
+            project_id=configuration["project_id"],
+            apikey=configuration["apikey"],
+            params=sum_parameters,
+        )
+    else:
+        summarize_llm = WatsonxLLM(
+            model_id="mistralai/mixtral-8x7b-instruct-v01",
+            url=os.getenv("WATSONX_URL"),
+            project_id=os.getenv("PROJECT_ID"),
+            apikey=os.getenv("WAX_API_KEY"),
+            params=sum_parameters,
+        )
+
     document_chunks = chunk_input(text)
     # Summarizing using map reduce method
     map_prompt = """

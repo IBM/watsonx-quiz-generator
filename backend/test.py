@@ -10,6 +10,7 @@ load_dotenv()  # Load environment variables from .env file
 prompt_template = f"{system_prompt}\n{user_msg}"
 
 prompt = PromptTemplate.from_template(prompt_template)
+response = None
 
 parameters = {
     "decoding_method": "greedy",
@@ -17,16 +18,23 @@ parameters = {
     "min_new_tokens": 1,
     "repetition_penalty": 1,
 }
+try:
+    watsonx_llm = WatsonxLLM(
+        model_id="meta-llama/llama-3-3-70b-instruct",
+        url="test",
+        project_id="test",
+        apikey="test",
+        params=parameters,
+    )
+except Exception as e:
+    # print(type(e))
+    print("errorrrr", str(e))
+    response = f"Error: {str(e)}"
 
-watsonx_llm = WatsonxLLM(
-    model_id="meta-llama/llama-3-3-70b-instruct",
-    url=os.getenv("WATSONX_URL"),
-    project_id=os.getenv("PROJECT_ID"),
-    apikey=os.getenv("WAX_API_KEY"),
-    params=parameters,
-)
-llm_chain = prompt | watsonx_llm
-topic = ""
-response = llm_chain.invoke(topic)
+# llm_chain = prompt | watsonx_llm
+# topic = ""
+# response = llm_chain.invoke(topic)
+# response = "saf"
 # response = watsonx_llm.invoke("Who is man's best friend?")
-print(response)
+if "Error" in response and "validation error" in response:
+    print("response found")
