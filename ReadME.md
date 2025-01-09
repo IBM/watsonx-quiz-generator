@@ -26,8 +26,8 @@ brew install podman-compose      # macOS
 ### 1️⃣ Clone or Download the Repository
 
 ```bash
-git clone <your-repo-url>
-cd <your-repo-folder>
+git clone https://github.com/IBM/watsonx-quiz-generator
+cd watsonx-quiz-generator
 ```
 
 ### 2️⃣ Run with Docker
