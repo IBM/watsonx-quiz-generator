@@ -1,6 +1,7 @@
 # WatsonX Quiz Generator 🚀
 
 This is a full-stack application that consists of a FastAPI backend and a Next.js frontend, running in containers using Docker Compose or Podman Compose.
+Link to the technical article - https://community.ibm.com/community/user/watsonx/blogs/yash-sawlani/2024/12/31/langchain-watsonx-fastapi
 
 ## 📥 Prerequisites
 
