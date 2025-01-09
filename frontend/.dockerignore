@@ -1,0 +1,24 @@
+
+# Ignore dependencies and build outputs
+node_modules
+.next
+out
+dist
+
+# Ignore config files
+.DS_Store
+npm-debug.log
+yarn.lock
+
+# Ignore local environment files
+.env
+.env.local
+.env.development
+.env.production
+.env.test
+
+# Ignore git and editor files
+.git
+.gitignore
+.vscode
+.idea
