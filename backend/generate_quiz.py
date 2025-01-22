@@ -42,7 +42,7 @@ sum_parameters = {
 
 
 # Function to extract text from PDF and clean it
-def extract_text_from_pdf(pdf_path):
+def extract_text_from_pdf(pdf_path, from_page=None, to_page=None):
     print(pdf_path)
     if os.path.exists(pdf_path):
         print("Path exists.")
@@ -50,16 +50,37 @@ def extract_text_from_pdf(pdf_path):
         print("Path does not exist.")
 
     reader = PdfReader(pdf_path)
+    num_pages = len(reader.pages)
+
+    # Adjust from_page and to_page to be within the valid range
+    if from_page is not None:
+        from_page = max(0, from_page - 1)  # Convert to 0-based index
+        if from_page >= num_pages:
+            from_page = (
+                None  # Ignore from_page if it's greater than the number of pages
+            )
+
+    if to_page is not None:
+        to_page = min(
+            num_pages, to_page
+        )  # Ensure it does not exceed the number of pages
+        if to_page <= 0:
+            to_page = None  # Ignore to_page if it's less than or equal to 0
 
     raw_text = ""
-    for page in reader.pages:
+
+    for page_num in range(num_pages):
+        if from_page is not None and page_num < from_page:
+            continue
+        if to_page is not None and page_num >= to_page:
+            break
+
+        page = reader.pages[page_num]
         if is_toc_or_index_page(page.extract_text()):
             continue
         else:
             clean_page = clean_header_footer(page.extract_text())
             raw_text += clean_page + "\n"
-    # for page in reader.pages:
-    #     raw_text += page.extract_text() + "\n"
 
     processed_text = clean_text(raw_text)
     # print(processed_text)

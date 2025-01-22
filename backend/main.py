@@ -36,6 +36,8 @@ async def upload_file(
     apikey: str = Form(None),
     url: str = Form(None),
     project_id: str = Form(None),
+    from_page: str = Form(None),
+    to_page: str = Form(None),
 ):
     if not additional_contents:
         additional_contents = "Be concise and keep the questions unique."
@@ -54,7 +56,9 @@ async def upload_file(
         file_path = current_path / "uploads" / f"{file.filename}"
 
         print("Processing File")
-        processed_text = extract_text_from_pdf(file_path)  # Extract text from PDF
+        processed_text = extract_text_from_pdf(
+            file_path, from_page=from_page, to_page=to_page
+        )  # Extract text from PDF
         print("File Processed")
         # Remove File after text extraction
         if os.path.exists(file_path):

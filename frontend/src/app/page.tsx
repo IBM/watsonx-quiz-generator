@@ -30,6 +30,15 @@ export default function Home() {
   const [apiKey, setApiKey] = useState<string>("");
   const [url, setUrl] = useState<string>("");
   const [projectId, setProjectId] = useState<string>("");
+  const [fromPage, setFromPage] = useState<number | null>(null);
+  const [toPage, setToPage] = useState<number | null>(null);
+
+  const handleFromPageChange = (page: number) => {
+    setFromPage(page);
+  };
+  const handleToPageChange = (page: number) => {
+    setToPage(page);
+  };
   const handleAdditionalPromptChange = (text: string) => {
     setAdditionalPrompt(text);
   };
@@ -117,7 +126,12 @@ export default function Home() {
     formData.append("apikey", apiKey);
     formData.append("url", url);
     formData.append("project_id", projectId);
-
+    if (fromPage) {
+      formData.append("from_page", fromPage.toString());
+    }
+    if (toPage) {
+      formData.append("to_page", toPage.toString());
+    }
     try {
       const response = await axios.post(
         "http://127.0.0.1:8000/upload",
@@ -174,6 +188,10 @@ export default function Home() {
           resetFile={resetFile}
           inputText={inputText}
           handleInputTextUpdate={handleInputTextUpdate}
+          handleFromPageChange={handleFromPageChange}
+          handleToPageChange={handleToPageChange}
+          fromPage={fromPage}
+          toPage={toPage}
         />
       )}
       {currentPage === 2 && (

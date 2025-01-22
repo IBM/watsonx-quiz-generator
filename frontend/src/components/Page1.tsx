@@ -16,10 +16,14 @@ interface Page1Props {
   projectId: string;
   resetFile: () => void;
   inputText: string;
+  fromPage: number | null;
+  toPage: number | null;
   handleInputTextUpdate: (newText: string) => void;
   handleApiChange: (newText: string) => void;
   handleUrlChange: (newText: string) => void;
   handleProjectIdChange: (newText: string) => void;
+  handleFromPageChange: (page: number) => void;
+  handleToPageChange: (page: number) => void;
 }
 
 function Page1({
@@ -36,6 +40,10 @@ function Page1({
   apiKey,
   projectId,
   url,
+  handleFromPageChange,
+  handleToPageChange,
+  fromPage,
+  toPage,
 }: Page1Props) {
   const [inputType, setInputType] = useState<"file" | "text">("file");
   return (
@@ -153,6 +161,35 @@ function Page1({
                   {error && <AlertCircle className="w-5 h-5 text-red-500" />}
                 </Label>
                 {error && <p className="mt-2 text-sm text-red-600">{error}</p>}
+                <Label htmlFor="page-range" className="mt-5">
+                  (Optional) Specify a page range in the PDF to generate the
+                  quiz.
+                </Label>
+                <div className="flex gap-2">
+                  <Input
+                    id="page-range"
+                    type="number"
+                    placeholder="Page From"
+                    min="1"
+                    step="1"
+                    onChange={(e) =>
+                      handleFromPageChange(
+                        Math.floor(Math.abs(Number(e.target.value)))
+                      )
+                    }
+                  />
+                  <Input
+                    type="number"
+                    placeholder="Page To"
+                    min="1"
+                    step="1"
+                    onChange={(e) =>
+                      handleToPageChange(
+                        Math.floor(Math.abs(Number(e.target.value)))
+                      )
+                    }
+                  />
+                </div>
               </div>
             </>
           )}
@@ -190,7 +227,15 @@ function Page1({
               } else {
                 handleInputTextUpdate("");
               }
+
+              if (fromPage !== null && toPage !== null) {
+                if (fromPage < 1 || fromPage > toPage) {
+                  alert("Invalid page range");
+                  return;
+                }
+              }
               handlePageChange(2);
+              console.log(fromPage, toPage);
             }}
           >
             Next
