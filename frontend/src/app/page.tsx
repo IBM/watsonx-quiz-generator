@@ -21,7 +21,7 @@ export default function Home() {
   const [difficulty, setDifficulty] = useState<"easy" | "medium" | "hard">(
     "easy"
   ); // Default difficulty level
-  const MAX_FILE_SIZE_MB = 5; // Maximum file size in MB
+  const MAX_FILE_SIZE_MB = 25; // Maximum file size in MB
   const [noOfQuestions, setNoOfQuestions] = useState<number>(10);
   const [additionalPrompt, setAdditionalPrompt] = useState<string>("");
   const [loading, setLoading] = useState(false);

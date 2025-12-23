@@ -19,11 +19,11 @@ parameters = {
     "repetition_penalty": 1,
 }
 try:
-    watsonx_llm = WatsonxLLM(
+    watsonx_llm = watsonx_llm = WatsonxLLM(
         model_id="meta-llama/llama-3-3-70b-instruct",
-        url="test",
-        project_id="test",
-        apikey="test",
+        url=os.getenv("WATSONX_URL"),
+        project_id=os.getenv("PROJECT_ID"),
+        apikey=os.getenv("WAX_API_KEY"),
         params=parameters,
     )
 except Exception as e:
@@ -35,6 +35,7 @@ except Exception as e:
 # topic = ""
 # response = llm_chain.invoke(topic)
 # response = "saf"
-# response = watsonx_llm.invoke("Who is man's best friend?")
+response = watsonx_llm.invoke("Who is man's best friend?")
+print(response)
 if "Error" in response and "validation error" in response:
     print("response found")
